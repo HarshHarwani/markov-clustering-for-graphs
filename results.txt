@@ -1,0 +1,26 @@
+File 		Inflation(R) 		Expansion(M)  NoOfClusters
+att.txt			1.1					2				1
+att.txt			1.3					2				3
+att.txt			1.5					2				7
+att.txt			1.7					2				10
+att.txt			1.9					2				55
+att.txt			2.0					2				55
+
+
+File 		Inflation(R) 		Expansion(M)  NoOfClusters
+collab.txt			1.1					2				1
+collab.txt			1.3					2				7
+collab.txt			1.5					2				14
+collab.txt			1.7					2				20
+collab.txt			1.9					2				25
+collab.txt			2.0					2				25
+
+
+
+File 		Inflation(R) 		Expansion(M)  NoOfClusters
+yeast.txt			1.1					2				1
+yeast.txt			1.3					2				22
+yeast.txt			1.5					2				52
+yeast.txt			1.7					2				84
+yeast.txt			1.9					2				105
+yeast.txt			2.0					2				116	
