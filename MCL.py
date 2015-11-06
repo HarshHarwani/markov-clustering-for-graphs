@@ -59,14 +59,20 @@ class Util:
 
     def createAndWriteCluFile(self,clusters,file,max):
         custMap=self.buildCluMap(clusters)
+
+        # removing the file if its already exists
         if os.path.exists(file):
             os.remove(file)
+
+         # getting the fileObject
         fileObject = open(file, 'w')
         fileObject.write("*Partition PartitionName")
         fileObject.write("\n")
         print int(max)
         fileObject.write("*Vertices "+str(int(max)))
         fileObject.write("\n")
+
+        # building map which stores which node is in which cluster
         for key in custMap:
             fileObject.write(str(custMap.get(key)))
             fileObject.write("\n")
@@ -95,6 +101,7 @@ def main():
         # normalizing the matrix
         matrix=Markov().normalize(adjacencyMatrix)
 
+        #configuration paramters
         max_loop=1000
         r=1.7
         m=3
@@ -108,10 +115,9 @@ def main():
             if np.array_equal(matrix,prev):
                 print("converged at Iternation-->",i)
                 break
+        # getting the clusters from the matrix
         clusters=Markov().get_clusters(matrix)
         print("Clusters for file-->",file)
-        print(clusters)
-        print len(clusters)
         Util().createAndWriteCluFile(clusters,myfile_name_without_suffix+".clu",max)
 
 
