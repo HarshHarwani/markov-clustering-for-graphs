@@ -57,18 +57,58 @@ class Util:
         return custMap
 
 
+    def calculateModularity(self,clusters,adjacencyMatrix):
+        intraSum=0
+        interSum=0
+
+        for key in clusters:
+            list=clusters.get(key)
+            intraSum+=self.calculateIntraClusterDist(list,adjacencyMatrix)
+
+        for i in range(len(clusters)):
+            list=clusters.get(i)
+            interSum+=self.calculateInterClusterDist(i,list,adjacencyMatrix,clusters)
+
+        return intraSum-interSum
+
+    def calculateIntraClusterDist(self,list,adjacencyMatrix):
+        sum=0
+        for i in range(len(list)):
+            ele=list[i]
+            for j in range(i+1,len(list)):
+                if adjacencyMatrix[i][j]==1:
+                    sum+=1
+        return sum
+
+    def calculateInterClusterDist(self,i,list,adjacencyMatrix,clusters):
+        sum=0
+        for j in range(i+1,len(clusters)):
+            listinner=clusters.get(j)
+            for ele in list:
+                for ele1 in listinner:
+                    if adjacencyMatrix[ele][ele1]==1:
+                        sum+=1
+        return sum
+
+    def calculateIntraClusterDist(self,list,adjacencyMatrix):
+        sum=0
+        for i in range(len(list)):
+            ele=list[i]
+            for j in range(i+1,len(list)):
+                if adjacencyMatrix[i][j]==1:
+                    sum+=1
+        return sum
+
     def createAndWriteCluFile(self,clusters,file,max):
         custMap=self.buildCluMap(clusters)
 
         # removing the file if its already exists
         if os.path.exists(file):
             os.remove(file)
-
          # getting the fileObject
         fileObject = open(file, 'w')
         fileObject.write("*Partition PartitionName")
         fileObject.write("\n")
-        print int(max)
         fileObject.write("*Vertices "+str(int(max)))
         fileObject.write("\n")
 
@@ -82,11 +122,10 @@ def main():
         basename = os.path.basename(file)
         filename = os.path.splitext(basename)
         myfile_name_without_suffix = filename[0]
-        print "For file-->",file
+        print "For file ",file
         edges = np.loadtxt(file)
         # taking the max from the array to create new matrix of required dimension
         max=np.amax(edges)
-        print max
 
         # extracting two columns from the original two dimensional array
         firstColumn=edges[:,0]
@@ -94,31 +133,31 @@ def main():
 
         # creating the initial empty array, creating one extra dimension to start the index from 1.
         initalMatrix=np.ndarray(shape=(max+1,max+1))
+        for m in range(2,7):
+            for r in np.arange(1.1,2.2,0.2):
+                # creating the adjacencyMatrix
+                adjacencyMatrix=Util().createAdjMatrix(initalMatrix,firstColumn,secondColumn)
 
-        # creating the adjacencyMatrix
-        adjacencyMatrix=Util().createAdjMatrix(initalMatrix,firstColumn,secondColumn)
-
-        # normalizing the matrix
-        matrix=Markov().normalize(adjacencyMatrix)
-
-        #configuration paramters
-        max_loop=1000
-        r=1.7
-        m=3
-        for i in range(max_loop):
-            print("Iteration no-->,", i)
-            # maintaining a previous copy for checking convergence
-            prev = matrix.copy();
-            matrix=Markov().expand(matrix,m)
-            matrix=Markov().inflate(matrix,r)
-            # convergence condition
-            if np.array_equal(matrix,prev):
-                print("converged at Iternation-->",i)
-                break
-        # getting the clusters from the matrix
-        clusters=Markov().get_clusters(matrix)
-        print("Clusters for file-->",file)
-        Util().createAndWriteCluFile(clusters,myfile_name_without_suffix+".clu",max)
-
+                # normalizing the matrix
+                matrix=Markov().normalize(adjacencyMatrix)
+                #configuration paramters
+                max_loop=1000
+                iterations=0
+                for i in range(max_loop):
+                    iterations+=1
+                    # maintaining a previous copy for checking convergence
+                    prev = matrix.copy();
+                    matrix=Markov().expand(matrix,m)
+                    matrix=Markov().inflate(matrix,r)
+                    # convergence condition
+                    if np.array_equal(matrix,prev):
+                        print("converged at Iternation-->",i)
+                        break
+                # getting the clusters from the matrix
+                clusters=Markov().get_clusters(matrix)
+                Util().createAndWriteCluFile(clusters,myfile_name_without_suffix+".clu",max)
+                modularity=Util().calculateModularity(clusters,adjacencyMatrix)
+                print(" M=>"+str(m)+" R=>"+str(r)+" no of clusters=> "+str(len(clusters))+" Modularity=>"+str(modularity)+" Iterations "+str(iterations))
+                print("================================================================================================")
 
 if __name__ == "__main__": main()
